@@ -2,32 +2,28 @@ package ledstrip
 
 import (
 	"bytes"
-	"fmt"
-	"log"
-	"time"
 
-	"github.com/stianeikeland/go-rpio/v4"
 	"tinygo.org/x/drivers/ws2812"
 )
 
-func Init_rpio() {
+// func Init_rpio() {
 
-	fmt.Println("Initializing rpio")
-	err := rpio.Open()
-	if err != nil {
-		log.Printf("Fatal gpio error %v\n", err)
-	}
-	defer rpio.Close()
-	pin := rpio.Pin(17)
-	pin.Output()
-	pin.Write(rpio.High)
-	fmt.Println("5 blink confirmation")
-	time.Sleep(500)
-	for x := 0; x < 5; x++ {
-		pin.Toggle()
-		time.Sleep(time.Second / 2)
-	}
-}
+// 	fmt.Println("Initializing rpio")
+// 	err := rpio.Open()
+// 	if err != nil {
+// 		log.Printf("Fatal gpio error %v\n", err)
+// 	}
+// 	defer rpio.Close()
+// 	pin := rpio.Pin(17)
+// 	pin.Output()
+// 	pin.Write(rpio.High)
+// 	fmt.Println("5 blink confirmation")
+// 	time.Sleep(500)
+// 	for x := 0; x < 5; x++ {
+// 		pin.Toggle()
+// 		time.Sleep(time.Second / 2)
+// 	}
+// }
 
 type MessageType int
 
@@ -60,40 +56,57 @@ func (c *RGBW) GBRASlice() []byte {
 	return []byte{c.G, c.R, c.B, c.W}
 }
 
-var ledStrip ws2812.Device
-
-// func (d *ws2812.Device) Init(pixels int) {
-func Init_ledstrip(pixels int) {
-	// n.Pin.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	ledStrip = ws2812.New(5)
-	fmt.Println(ledStrip.Pin)
-	// for i := 0; i < pixels; i++ {
-	// 	n.NeoPixels = append(n.NeoPixels, &NeoPixel{RGBW{0x00, 0x00, 0x00, 0x00}})
-	// }
-
+type rgbledstrip struct {
+	Device ws2812.Device
+	Count  int
+	Pin    uint8
 }
 
-func setColor(ledCount int, color RGBW) {
-	buf := new(bytes.Buffer)
+// func (d *ws2812.Device) Init(pixels int) {
+func Init_ledstrip(pixels int) *rgbledstrip {
+	var strip rgbledstrip
+	// n.Pin.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	// var leds = new LedStrip;
+	tmp_device := ws2812.NewWS2812(17)
+	strip = rgbledstrip{Device: tmp_device}
+	strip.Count = 0
+	// pin := tmp_device.Pin
+	// strip.pin = pin
+	// // strip.pin = uint8()
+	// fmt.Printf("Current pin:\t%f\n", strip.device.Pin)
+	// for i := 0; i < pixels; i++ {
+	// 	setColor(buf, 2, Colors[1])
+	// 	// n.NeoPixels = append(n.NeoPixels, &NeoPixel{RGBW{0x00, 0x00, 0x00, 0x00}})
+	// }
+	// return strip
+	return &strip
+}
+
+func (rgbstrip rgbledstrip) SetColor(buf *bytes.Buffer, ledCount int, color RGBW) {
+	// buf := new(bytes.Buffer)
 	for i := 0; i < ledCount; i++ {
 		buf.Write(color.GBRASlice())
 	}
-	WriteColor(buf, color)
+	writeColor(rgbstrip, buf, color)
 }
 
-func WriteColor(buf *bytes.Buffer, color RGBW) {
+func writeColor(strip rgbledstrip, buf *bytes.Buffer, color RGBW) {
 	// buf.Write(color.GBRASlice())
 	// for _, color := range Colors {
 	// }
 	// ledStrip.Write(buf.Bytes())
-	ledStrip.Write(buf.Bytes())
+	// _, err := strip.device.Write(buf.Bytes())
+	// if err != nil {
+	// 	fmt.Printf("Error writing colorbuffer to led(s):\n%v\n", err)
+	// }
 
 }
-func (ledstrip.WriteColor) WriteColor(colors [][]RGBW) {
-	buf := new(bytes.Buffer)
-	for _, color := range Colors {
-		buf.Write(color.GBRASlice())
-	}
-	ledStrip.Write(buf.Bytes())
 
-}
+// func (ledstrip.WriteColor) WriteColor(colors [][]RGBW) {
+// 	buf := new(bytes.Buffer)
+// 	for _, color := range Colors {
+// 		buf.Write(color.GBRASlice())
+// 	}
+// 	ledStrip.Write(buf.Bytes())
+
+// }

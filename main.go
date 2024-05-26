@@ -16,8 +16,13 @@ import (
 	"log"
 	"time"
 
+	"machine"
+
 	"github.com/stianeikeland/go-rpio/v4"
+	"tinygo.org/x/drivers/ws2812"
 )
+
+var neo machine.Pin = machine.WS2812
 
 func main() {
 
@@ -37,7 +42,18 @@ func main() {
 		pin.Toggle()
 		time.Sleep(time.Second / 5)
 	}
-	Init_ledstrip()
+
+	// led := machine.LED
+	led.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	// tmp := machine
+	// dev := ws2812.NewWS2812(LED)
+	// fmt.Println(dev.Pin)
+	// pin.DutyCycle()
+
+	// leds := ledstrip.Init_ledstrip(5)
+
+	// fmt.Printf("Test%v", leds.Pin)
+
 }
 
 // type MessageType int
